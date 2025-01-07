@@ -16,3 +16,16 @@ type CounterInterfaceImp struct{}
 
 // Imp 实现实例
 var Imp CounterInterface = &CounterInterfaceImp{}
+
+// VoteInterface 计数器数据模型接口
+type VoteInterface interface {
+	GetVote() (*VoteData, error)
+	UpsertVote(data *VoteData) error
+	ClearVote() error
+}
+
+// CounterInterfaceImp 计数器数据模型实现
+type VoteInterfaceImp struct{}
+
+// Imp 实现实例
+var VoteImp VoteInterface = &VoteInterfaceImp{}
