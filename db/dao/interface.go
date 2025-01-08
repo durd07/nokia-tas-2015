@@ -22,6 +22,7 @@ type VoteInterface interface {
 	GetVote() (*VoteData, error)
 	UpsertVote(data *VoteData) error
 	ClearVote() error
+	GetVoteList() (*map[string][]string, error)
 }
 
 // CounterInterfaceImp 计数器数据模型实现

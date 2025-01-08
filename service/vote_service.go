@@ -8,6 +8,32 @@ import (
 	"wxcloudrun-golang/db/dao"
 )
 
+func VoteListHandler(w http.ResponseWriter, r *http.Request) {
+	res := &JsonResult{}
+	if r.Method != http.MethodGet {
+		res.Code = -1
+		res.ErrorMsg = fmt.Sprintf("请求方法 %s 不支持", r.Method)
+	} else {
+		data, err := dao.VoteImp.GetVoteList()
+		if err != nil {
+			res.Code = -1
+			res.ErrorMsg = fmt.Sprintf("GetVoteList error %v", err)
+		} else {
+			res.Code = 0
+			res.Data = data
+		}
+	}
+
+	msg, err := json.Marshal(res)
+	if err != nil {
+		fmt.Fprint(w, "内部错误")
+		return
+	}
+
+	w.Header().Set("content-type", "application/json")
+	w.Write(msg)
+}
+
 func VoteHandler(w http.ResponseWriter, r *http.Request) {
 	res := &JsonResult{}
 
