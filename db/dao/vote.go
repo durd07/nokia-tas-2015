@@ -5,52 +5,50 @@ import (
 	"sync"
 	"gopkg.in/yaml.v3"
 	"log"
+	"wxcloudrun-golang/db/model"
 )
 
-type VoteData map[string]map[string]int32
-
 var (
-	vote_data VoteData
-	vote_data_list map[string][]string
-
+	vote_data model.VoteData
 	mu        sync.Mutex
-	vote_data_list_lock sync.RWMutex
 )
 
 func loadData() {
-	data, err := os.ReadFile("./ntas.yaml")
+	text, err := os.ReadFile("ntas.yaml")
 	if err != nil {
 		log.Fatalf("Error reading file: %v", err)
 	}
 
-	vote_data_list_lock.Lock()
-	err = yaml.Unmarshal(data, &vote_data_list)
-	vote_data_list_lock.Unlock()
+	var data map[string][]string
+	err = yaml.Unmarshal(text, &data)
 	if err != nil {
 		log.Fatalf("Error parsing YAML: %v", err)
 	}
 
-	mu.Lock()
-	defer mu.Unlock()
-
-	vote_data_list_lock.RLock()
-	defer vote_data_list_lock.RUnlock()
-
 	// construct VoteData
-	vote_data = make(VoteData)
+	vote_data = make(model.VoteData)
 
-	for k, v := range vote_data_list {
+	for k, v := range data {
 		if _, exists := vote_data[k]; !exists {
-			vote_data[k] = make(map[string]int32)
+			vote_data[k] = &model.VoteModel{
+				Name: k,
+				Members: make(map[string]*model.MemberModel),
+			}
 		}
 
 		for _, x := range v {
-			vote_data[k][x] = 0
+			vote_data[k].Members[x] = &model.MemberModel{
+				Name: x,
+				Vote: 0,
+			}
 		}
 	}
 }
 
 func init() {
+	mu.Lock()
+	defer mu.Unlock()
+
 	loadData()
 }
 
@@ -64,13 +62,13 @@ func (imp *VoteInterfaceImp) ClearVote() error {
 }
 
 // UpsertVote 更新/写入counter
-func (imp *VoteInterfaceImp) UpsertVote(data *VoteData) error {
+func (imp *VoteInterfaceImp) UpsertVote(data model.VoteData) error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	for k, items := range *data {
-		for v, _ := range items {
-			vote_data[k][v] += 1
+	for k, manager := range data {
+		for v, _ := range manager.Members {
+			vote_data[k].Members[v].Vote += 1
 		}
 	}
 
@@ -78,16 +76,9 @@ func (imp *VoteInterfaceImp) UpsertVote(data *VoteData) error {
 }
 
 // GetVote 查询Vote
-func (imp *VoteInterfaceImp) GetVote() (*VoteData, error) {
+func (imp *VoteInterfaceImp) GetVote() (model.VoteData, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	return &vote_data, nil
-}
-
-func (imp *VoteInterfaceImp) GetVoteList() (*map[string][]string, error) {
-	vote_data_list_lock.RLock()
-	defer vote_data_list_lock.RUnlock()
-
-	return &vote_data_list, nil
+	return vote_data, nil
 }

@@ -19,10 +19,9 @@ var Imp CounterInterface = &CounterInterfaceImp{}
 
 // VoteInterface 计数器数据模型接口
 type VoteInterface interface {
-	GetVote() (*VoteData, error)
-	UpsertVote(data *VoteData) error
+	GetVote() (model.VoteData, error)
+	UpsertVote(data model.VoteData) error
 	ClearVote() error
-	GetVoteList() (*map[string][]string, error)
 }
 
 // CounterInterfaceImp 计数器数据模型实现

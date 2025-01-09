@@ -6,33 +6,8 @@ import (
 	"net/http"
 
 	"wxcloudrun-golang/db/dao"
+	"wxcloudrun-golang/db/model"
 )
-
-func VoteListHandler(w http.ResponseWriter, r *http.Request) {
-	res := &JsonResult{}
-	if r.Method != http.MethodGet {
-		res.Code = -1
-		res.ErrorMsg = fmt.Sprintf("请求方法 %s 不支持", r.Method)
-	} else {
-		data, err := dao.VoteImp.GetVoteList()
-		if err != nil {
-			res.Code = -1
-			res.ErrorMsg = fmt.Sprintf("GetVoteList error %v", err)
-		} else {
-			res.Code = 0
-			res.Data = data
-		}
-	}
-
-	msg, err := json.Marshal(res)
-	if err != nil {
-		fmt.Fprint(w, "内部错误")
-		return
-	}
-
-	w.Header().Set("content-type", "application/json")
-	w.Write(msg)
-}
 
 func VoteHandler(w http.ResponseWriter, r *http.Request) {
 	res := &JsonResult{}
@@ -77,13 +52,13 @@ func VoteHandler(w http.ResponseWriter, r *http.Request) {
 
 func upsertVote(r *http.Request) error {
 	decoder := json.NewDecoder(r.Body)
-	body := make(dao.VoteData)
+	body := make(model.VoteData)
 	if err := decoder.Decode(&body); err != nil {
 		return err
 	}
 	defer r.Body.Close()
 
-	if err := dao.VoteImp.UpsertVote(&body); err != nil {
+	if err := dao.VoteImp.UpsertVote(body); err != nil {
 		return err
 	}
 	return nil
@@ -93,7 +68,7 @@ func clearVote() error {
 	return dao.VoteImp.ClearVote()
 }
 
-func getCurrentVote() (*dao.VoteData, error) {
+func getCurrentVote() (model.VoteData, error) {
 	data, err := dao.VoteImp.GetVote()
 	if err != nil {
 		return nil, err
