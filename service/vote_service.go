@@ -74,6 +74,9 @@ func VoteHandler(w http.ResponseWriter, r *http.Request) {
 			res.Data = ""
 		}
 	} else if r.Method == http.MethodDelete {
+		// update version
+		version = time.Now().Format("2006-01-02 15:04:05")
+
 		err := clearVote()
 		if err != nil {
 			res.Code = -1
@@ -126,7 +129,7 @@ func getVoteResult() ([]model.MemberModel, error) {
 	data, _ := dao.VoteImp.GetVote()
 
 	text, _ := json.Marshal(data)
-	log.Printf("Vote Result %v\n", text)
+	log.Printf("Vote Result %v\n", string(text))
 
 	ret := []model.MemberModel{}
 	for g, v := range data.Data {
@@ -153,7 +156,7 @@ func getAllVoteResult() map[string]*model.VoteModel {
 	data, _ := dao.VoteImp.GetVote()
 
 	text, _ := json.Marshal(data)
-	log.Printf("Vote Result %v\n", text)
+	log.Printf("Vote Result %v\n", string(text))
 
 	return data.Data
 }

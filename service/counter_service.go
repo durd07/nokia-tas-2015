@@ -3,7 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"net/http"
 	"time"
 
@@ -22,12 +22,20 @@ type JsonResult struct {
 
 // IndexHandler 计数器接口
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := getIndex()
+	b, err := os.ReadFile("./index.html")
 	if err != nil {
-		fmt.Fprint(w, "内部错误")
 		return
 	}
-	fmt.Fprint(w, data)
+
+	fmt.Fprint(w, string(b))
+}
+
+func ScreenHandler(w http.ResponseWriter, r *http.Request) {
+	b, err := os.ReadFile("./screen.html")
+	if err != nil {
+		return
+	}
+	fmt.Fprint(w, string(b))
 }
 
 // CounterHandler 计数器接口
