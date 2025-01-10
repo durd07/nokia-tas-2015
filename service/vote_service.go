@@ -52,7 +52,7 @@ func VoteHandler(w http.ResponseWriter, r *http.Request) {
 
 func upsertVote(r *http.Request) error {
 	decoder := json.NewDecoder(r.Body)
-	body := make(model.VoteData)
+	var body []string
 	if err := decoder.Decode(&body); err != nil {
 		return err
 	}
@@ -69,10 +69,6 @@ func clearVote() error {
 }
 
 func getCurrentVote() (model.VoteData, error) {
-	data, err := dao.VoteImp.GetVote()
-	if err != nil {
-		return nil, err
-	}
-
+	data, _ := dao.VoteImp.GetVote()
 	return data, nil
 }

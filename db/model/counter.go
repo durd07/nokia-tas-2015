@@ -20,4 +20,29 @@ type VoteModel struct {
 	Members map[string]*MemberModel `gorm:"column:members" json:"members"`
 }
 
-type VoteData map[string]*VoteModel
+type VoteData struct {
+	EmployeeManagerMapping map[string]string
+	Data map[string]*VoteModel
+}
+
+func InitVoteData(data map[string][]string) VoteData {
+	voteData := VoteData{}
+
+	for k, v := range data {
+		if _, exists := voteData.Data[k]; !exists {
+			voteData.Data[k] = &VoteModel{
+				Name: k,
+				Members: make(map[string]*MemberModel),
+			}
+		}
+
+		for _, x := range v {
+			voteData.EmployeeManagerMapping[x] = k
+			voteData.Data[k].Members[x] = &MemberModel{
+				Name: x,
+				Vote: 0,
+			}
+		}
+	}
+	return voteData
+}

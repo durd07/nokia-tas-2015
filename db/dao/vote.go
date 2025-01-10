@@ -25,24 +25,7 @@ func loadData() {
 		log.Fatalf("Error parsing YAML: %v", err)
 	}
 
-	// construct VoteData
-	vote_data = make(model.VoteData)
-
-	for k, v := range data {
-		if _, exists := vote_data[k]; !exists {
-			vote_data[k] = &model.VoteModel{
-				Name: k,
-				Members: make(map[string]*model.MemberModel),
-			}
-		}
-
-		for _, x := range v {
-			vote_data[k].Members[x] = &model.MemberModel{
-				Name: x,
-				Vote: 0,
-			}
-		}
-	}
+	vote_data = model.InitVoteData(data)
 }
 
 func init() {
@@ -62,14 +45,13 @@ func (imp *VoteInterfaceImp) ClearVote() error {
 }
 
 // UpsertVote 更新/写入counter
-func (imp *VoteInterfaceImp) UpsertVote(data model.VoteData) error {
+func (imp *VoteInterfaceImp) UpsertVote(data []string) error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	for k, manager := range data {
-		for v, _ := range manager.Members {
-			vote_data[k].Members[v].Vote += 1
-		}
+	for _, person := range data {
+		manager := vote_data.EmployeeManagerMapping[person]
+		vote_data.Data[manager].Members[person].Vote += 1
 	}
 
 	return nil
