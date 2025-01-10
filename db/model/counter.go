@@ -27,6 +27,8 @@ type VoteData struct {
 
 func InitVoteData(data map[string][]string) VoteData {
 	voteData := VoteData{}
+	voteData.EmployeeManagerMapping = make(map[string]string)
+	voteData.Data = make(map[string]*VoteModel)
 
 	for k, v := range data {
 		if _, exists := voteData.Data[k]; !exists {
