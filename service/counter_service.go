@@ -159,7 +159,7 @@ func getAction(r *http.Request) (string, error) {
 
 // getIndex 获取主页
 func getIndex() (string, error) {
-	b, err := ioutil.ReadFile("./index.html")
+	b, err := os.ReadFile("./index.html")
 	if err != nil {
 		return "", err
 	}
