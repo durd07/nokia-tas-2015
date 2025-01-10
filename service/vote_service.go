@@ -134,7 +134,7 @@ func getVoteResult() ([]model.MemberModel, error) {
 	ret := []model.MemberModel{}
 	for g, v := range data.Data {
 		maxkey := ""
-		maxval := -1
+		maxval := 0
 
 		for k, x := range v.Members {
 			if int(x.Vote) > maxval {
