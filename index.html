@@ -88,7 +88,7 @@
                 if (!response.ok) {
                     throw new Error("Failed to fetch data from the API");
                 }
-                const data = await response.json().data;
+                const data = (await response.json()).data;
 
                 // 获取最大票数
                 const maxVote = Math.max(...data.map(item => item.vote));
