@@ -158,13 +158,13 @@ func getAllVoteResult() map[string]*model.VoteModel {
 	return data.Data
 }
 
-func getMembers() ([]model.MemberModel, error) {
+func getMembers() ([]string, error) {
 	data, _ := dao.VoteImp.GetVote()
 
-	ret := []model.MemberModel{}
-	for m, v := range data.Data {
+	ret := []string{}
+	for _, v := range data.Data {
 		for k, _ := range v.Members {
-			ret = append(ret, *data.Data[m].Members[k])
+			ret = append(ret, k)
 		}
 	}
 	return ret, nil
