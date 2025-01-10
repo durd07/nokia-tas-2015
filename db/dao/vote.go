@@ -50,7 +50,7 @@ func (imp *VoteInterfaceImp) UpsertVote(data []string) error {
 	defer mu.Unlock()
 
 	for _, person := range data {
-		manager := vote_data.EmployeeManagerMapping[person]
+		manager := vote_data.GroupMapping[person]
 		vote_data.Data[manager].Members[person].Vote += 1
 	}
 

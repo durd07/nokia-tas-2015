@@ -21,13 +21,13 @@ type VoteModel struct {
 }
 
 type VoteData struct {
-	EmployeeManagerMapping map[string]string
+	GroupMapping map[string]string
 	Data map[string]*VoteModel
 }
 
 func InitVoteData(data map[string][]string) VoteData {
 	voteData := VoteData{}
-	voteData.EmployeeManagerMapping = make(map[string]string)
+	voteData.GroupMapping = make(map[string]string)
 	voteData.Data = make(map[string]*VoteModel)
 
 	for k, v := range data {
@@ -39,7 +39,7 @@ func InitVoteData(data map[string][]string) VoteData {
 		}
 
 		for _, x := range v {
-			voteData.EmployeeManagerMapping[x] = k
+			voteData.GroupMapping[x] = k
 			voteData.Data[k].Members[x] = &MemberModel{
 				Name: x,
 				Vote: 0,
