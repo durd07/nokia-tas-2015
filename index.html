@@ -54,9 +54,9 @@
             max-width: 90%;
             max-height: 90%;
             overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            font-size: calc(6rem + 0.5vw);
+            white-space: normal; /* 允许换行 */
+            word-wrap: break-word; /* 长单词自动换行 */
+            text-align: center;
         }
 
         .restricted-area {
@@ -65,8 +65,6 @@
             left: 10%;
             width: 80%;
             height: 70%;
-            /*border: 2px dashed rgba(255, 255, 255, 0.3);*/
-            pointer-events: none;
         }
     </style>
 </head>
@@ -78,8 +76,8 @@
     </div>
 
     <script>
-        //const apiUrl = "https://golang-vblz-134715-9-1334759311.sh.run.tcloudbase.com/api/vote";
-        const apiUrl = "http://localhost/api/vote";
+        //const apiUrl = "http://localhost/api/vote";
+        const apiUrl = "https://golang-vblz-134715-9-1334759311.sh.run.tcloudbase.com/api/vote";
         const container = document.getElementById('bubbleContainer');
         const restrictedArea = document.getElementById('restrictedArea');
 
@@ -105,7 +103,7 @@
                 bubble.className = 'bubble';
 
                 // 设置气泡大小
-                const size = (item.vote / maxVotes) * 200 + 100; // 最小 100px，随票数缩放
+                const size = (item.vote / maxVotes) * 100 + 200; // 最小 100px，随票数缩放
                 bubble.style.width = `${size}px`;
                 bubble.style.height = `${size}px`;
 
@@ -116,14 +114,17 @@
 
                 // 获取不重叠位置
                 const position = generateNonOverlappingPosition(size);
-                console.log(position)
                 bubble.style.left = `${position.x}px`;
                 bubble.style.top = `${position.y}px`;
 
                 // 添加文本
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = item.name;
-                nameSpan.style.fontSize = `${Math.min(size / 5, 20)}px`;
+
+                // 动态设置字体大小，确保文字不会超出气泡范围
+                const fontSize = Math.min(size * 0.2, size / item.name.length * 3); // 动态调整字体大小
+                nameSpan.style.fontSize = `${fontSize}px`;
+
                 bubble.appendChild(nameSpan);
 
                 // 添加拖拽功能
@@ -166,8 +167,6 @@
                 x = Math.random() * (rect.width - size) + rect.left;
                 y = Math.random() * (rect.height - size) + rect.top;
 
-                console.log(Math.random(), rect.width, size, rect.left, x)
-
                 bubbles.forEach(bubble => {
                     const bubbleRect = bubble.getBoundingClientRect();
                     const bubbleCenterX = bubbleRect.left + bubbleRect.width / 2;
@@ -200,3 +199,4 @@
 </body>
 
 </html>
+
