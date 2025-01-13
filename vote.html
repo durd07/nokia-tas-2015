@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Team Star</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 475px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      /*border-radius: 8px;*/
+      box-sizing: border-box;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .index-bd {
+      margin-bottom: 20px;
+    }
+
+    .weui-cells {
+      padding: 1px;
+      /*border-radius: 8px;*/
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+    }
+
+    .weui-cell_input {
+      display: flex;
+      justify-content: center;
+    }
+
+    .weui-cell_input input {
+      width: calc(100% - 20px);
+      max-width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      /*border-radius: 4px;*/
+      outline: none;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .box {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #f9f9f9;
+      color: #333;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .box.selected {
+      background-color: #1AAD19;
+      color: white;
+      border-color: #1AAD19;
+    }
+
+    .btn-area {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    button {
+      width: 200px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #1AAD19;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.2s ease;
+    }
+
+    button:disabled {
+      background-color: #ddd;
+      cursor: not-allowed;
+    }
+
+    .blank-line {
+      height: 15px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="title">Team Star</div>
+    <div class="index-bd">
+      <div class="weui-cell weui-cell_input">
+        <input type="text" id="searchInput" maxlength="10" placeholder="Search name from here..."
+          oninput="onSearchInput(event)">
+      </div>
+    </div>
+    <div class="container" id="container">
+      <!-- Rows will be dynamically populated -->
+    </div>
+    <div class="btn-area">
+      <button id="submitButton" onclick="submitData()">提交</button>
+    </div>
+  </div>
+  <script>
+    let items = {};
+    let rows = [];
+    let filteredItems = {};
+    let hasSubmitted = false;
+
+    async function loadConfig() {
+      try {
+        const response = await fetch('/api/config', {
+          method: 'GET',
+          headers: {
+            'X-WX-SERVICE': 'golang-vblz',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          const version = data.version;
+
+          // Check version and reset "submitted" state if necessary
+          const storedVersion = localStorage.getItem('version');
+          if (storedVersion !== version) {
+            localStorage.setItem('submitted', 'false');
+          }
+
+          const hasSubmitted = localStorage.getItem('submitted') === 'true';
+          console.log('Has Submitted:', hasSubmitted);
+          document.getElementById('submitButton').disabled = hasSubmitted;
+
+          // Update state or UI
+          const appState = {
+            hasSubmitted,
+            version,
+          };
+
+          console.log('App State:', appState);
+
+          // Save the version for future comparisons
+          localStorage.setItem('version', version);
+        } else {
+          console.error('Config fetch failed with status:', response.status);
+        }
+      } catch (error) {
+        console.error('Config fetch failed:', error);
+      }
+    }
+
+    async function fetchData() {
+      try {
+        const response = await fetch('/api/members');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = (await response.json()).data;
+
+        items = data.sort().reduce((acc, name) => {
+          acc[name] = {name, selected: false};
+          return acc;
+        }, {});
+
+        filteredItems = {...items};
+        rows = createRows(filteredItems);
+        renderRows();
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        alert('Failed to fetch data from the server.');
+      }
+    }
+
+    function renderRows() {
+      const container = document.getElementById('container');
+      container.innerHTML = '';
+      rows.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'row';
+        row.forEach(person => {
+          const box = document.createElement('div');
+          box.className = `box ${person.selected ? 'selected' : ''}`;
+          box.textContent = person.name;
+          box.dataset.name = person.name;
+          box.onclick = () => onBoxClick(person.name);
+          rowDiv.appendChild(box);
+        });
+        container.appendChild(rowDiv);
+      });
+    }
+
+    function createRows(data) {
+      const entries = Object.values(data);
+      const rows = [];
+      for (let i = 0; i < entries.length; i += 3) {
+        rows.push(entries.slice(i, i + 3));
+      }
+      return rows;
+    }
+
+    function onBoxClick(name) {
+      console.log(filteredItems)
+      if (!filteredItems[name].selected) {
+        const selectedCount = Object.values(
+          Object.fromEntries(
+            Object.entries(items).filter(([key, value]) => value.selected === true)
+          )
+        ).length;
+
+        if (selectedCount >= 3) {
+          alert('最多选择三项');
+          return;
+        }
+      }
+      filteredItems[name].selected = !filteredItems[name].selected;
+      rows = createRows(filteredItems);
+      renderRows();
+    }
+
+    function onSearchInput(event) {
+      const query = event.target.value.toLowerCase();
+      if (!query) {
+        filteredItems = {...items};
+      } else {
+        filteredItems = Object.fromEntries(
+          Object.entries(items).filter(([name]) => name.toLowerCase().includes(query))
+        );
+      }
+      rows = createRows(filteredItems);
+      renderRows();
+    }
+
+    function submitData() {
+      const selected = Object.values(filteredItems).filter(item => item.selected).map(item => item.name);
+      if (selected.length === 0) {
+        alert('请至少选择一项');
+        return;
+      }
+      if (selected.length > 3) {
+        alert('最多选择三项');
+        return;
+      }
+      hasSubmitted = true;
+      document.getElementById('submitButton').disabled = hasSubmitted;
+      localStorage.setItem('submitted', 'true')
+      alert('提交成功: ' + selected.join(', '));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+      fetchData();
+    });
+  </script>
+</body>
+
+</html>

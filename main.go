@@ -14,6 +14,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", service.IndexHandler)
+	http.HandleFunc("/vote", service.ScreenHandler)
 	// http.HandleFunc("/screen", service.ScreenHandler)
 	// http.HandleFunc("/api/count", service.CounterHandler)
 

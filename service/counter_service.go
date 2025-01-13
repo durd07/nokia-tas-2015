@@ -31,7 +31,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ScreenHandler(w http.ResponseWriter, r *http.Request) {
-	b, err := os.ReadFile("./screen.html")
+	b, err := os.ReadFile("./vote.html")
 	if err != nil {
 		return
 	}
